@@ -16,7 +16,7 @@ const apps = [
     name: "CandyMachine mint URL",
     description: "Create minting url for CandyMachine collections",
     button: "Create",
-    link: "/gasless",
+    link: "/candymachine",
     gradient: "linear-gradient(109.2deg, #C762F7 -3.96%, #F76262 100.3%)",
     image: mintNFT.src
   },
@@ -24,7 +24,7 @@ const apps = [
     name: "Gasless NFT collection",
     description: "Create minting url for a Gasless NFT collection",
     button: "Create",
-    link: "/candymachine",
+    link: "/gasless",
     gradient: "linear-gradient(109.2deg, #62F7EE -3.96%, #6271F7 100.3%)",
     image: uploadImage.src
   }
