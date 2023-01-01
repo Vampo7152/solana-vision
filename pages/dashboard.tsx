@@ -6,7 +6,7 @@ import styles from '@/styles/Dashboard.module.scss';
 
 // Component Imports
 import { Navbar } from '@/layouts/Navbar';
-import { AddAppBox, AppBox } from '@/layouts/AppBox';
+import { AppBox } from '@/layouts/AppBox';
 import { apps } from '@/components/apps';
 
 const Dashboard: NextPage = () => {
@@ -19,7 +19,6 @@ const Dashboard: NextPage = () => {
           {apps.map((app, index) => (
             <AppBox key={index} {...app} />
           ))}
-          <AddAppBox />
         </div>
       </div>
     </div>

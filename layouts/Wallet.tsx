@@ -63,7 +63,7 @@ export const Wallet = ({
   children: React.ReactNode;
 }) => {
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const endpoint = MAINNET_ENDPOINT;
   const wallets = useMemo(
     () => [
       new SolanaMobileWalletAdapter({

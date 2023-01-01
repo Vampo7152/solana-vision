@@ -1,15 +1,13 @@
 import toast from 'react-hot-toast';
-import Bundlr from '@bundlr-network/client';
-import { BUNDLR_MAINNET_ENDPOINT } from '@/components/constants';
 import { WalletContextState } from '@solana/wallet-adapter-react';
-import { getBundlrBalance } from './getBundlrBalance';
-import { clusterApiUrl } from '@solana/web3.js';
-
+import {client} from '../lib/web3Storage';
+import axios from 'axios';
 
 interface Metadata {
   name: string;
   description: string;
   image: string;
+  network?: string;
 }
 
 const getMetadata = (
@@ -37,93 +35,44 @@ const getMetadata = (
   }
 }
 
-export const uploadBundlr = async (
-  wallet: WalletContextState,
-  image?: File,
-  metadata?: Metadata,
-) => {
-  if (!metadata) toast.loading('Uploading Image');
-  const tags = [];
-  const extension = image ? image.name.split('.').pop() : '';
-  const type = extension === 'jpg' ? 'jpeg' : extension;
+export const uploadImgbb = async (blob: any) => {
+  if (blob) toast.loading('Uploading Image');
+ 
+  const data = new FormData();
+  data.append("image", blob);
+  const imgBB = await axios.post('https://api.imgbb.com/1/upload?key=822079d074dfd089764b99744dadefc4', data);
+  const img_url = imgBB.data.data.url
 
-  if (!metadata) {
-    tags.push({ name: "Content-Type", value: `image/${type}` })
-  } else {
-    tags.push({ name: "Content-Type", value: "application/json" })
-  }
-
-  const bundlr = new Bundlr(
-    BUNDLR_MAINNET_ENDPOINT,
-    'solana',
-    wallet,
-    {
-      timeout: 60000,
-      providerUrl: clusterApiUrl('mainnet-beta'),
-    },
-  );
-
-  const metadataObject = metadata ? getMetadata(metadata, wallet) : null;
-  const metadataString = JSON.stringify(metadataObject);
-
-  let size = 0;
-
-  if (image) size = image.size;
-  if (metadata) new Blob([metadataString]).size;
-
-  console.log('Byte Size', size);
-
-  const price = await bundlr.getPrice(size);
-  console.log('Price', price);
-
-  const minimumFunds = price.multipliedBy(3);
-  console.log('Minimum Funds', minimumFunds);
-
-  let skipFund = false;
-
-  if (wallet.publicKey) {
-    const currentBalance = await getBundlrBalance(wallet.publicKey.toBase58());
-    console.log('Current Balance', currentBalance);
-    if (!currentBalance.lt(minimumFunds)) skipFund = true;
-  }
-
-  if (!skipFund) {
-    toast.dismiss();
-    toast.loading('Funding Bundlr for upload');
-    const toFundAmount = price.multipliedBy(50);
-    console.log(`Funding: ${toFundAmount}`);
-    try {
-      await bundlr.fund(toFundAmount);
-    }
-    catch (e) {
-      console.log(e);
-      toast.dismiss();
-      toast.error('Sorry, we were not able to fund the upload');
-      return;
-    }
-  }
-
-  let transaction;
-  if (image) {
-    const file = new Uint8Array(await image.arrayBuffer());
-    transaction = bundlr.createTransaction(file, { tags });
-  } else {
-    transaction = bundlr.createTransaction(metadataString, { tags });
-  }
-
-  await transaction.sign();
-  await transaction.upload();
-  const id = transaction.id;
-
-  if (!id) {
+  if (img_url === null) {
     toast.dismiss();
     toast.error('Error uploading image/metadata');
     return;
   }
-  const url = 'https://arweave.net/' + id;
   toast.dismiss();
-  if (!metadata) toast.success('Image stored permanently');
-  return url;
+  toast.success('Image stored');
+  return img_url;
 };
 
+export const uploadMetadata = async (
+  wallet: WalletContextState,
+  metadata: Metadata,
+) => {
 
+  if (metadata) toast.loading('Uploading metadata on IPFS');
+
+  const metadataObject = metadata ? getMetadata(metadata, wallet) : null;
+  const metadataFile = new File([JSON.stringify(metadataObject)], "metadata.json", {
+    type: "application/json",
+  });
+  const metadata_cid = await client.put([metadataFile]);
+  const metadata_url = `https://cloudflare-ipfs.com/ipfs/${metadata_cid}/metadata.json`;
+
+  if (metadata_cid === null) {
+    toast.dismiss();
+    toast.error('Error uploading image/metadata');
+    return;
+  }
+  toast.dismiss();
+  toast.success('Metadata stored');
+  return metadata_url;
+};

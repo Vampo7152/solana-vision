@@ -22,6 +22,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.10",
     "@solana/wallet-adapter-wallets": "^0.16.8",
     "@solana/web3.js": "^1.50.0",
+    "axios": "^1.2.2",
     "bignumber.js": "^9.1.0",
     "next": "12.2.3",
     "nprogress": "^0.2.0",
@@ -29,7 +30,8 @@
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.3.0",
     "sass": "^1.54.0",
-    "typeface-libre-baskerville": "^1.1.13"
+    "typeface-libre-baskerville": "^1.1.13",
+    "web3.storage": "^4.4.0"
   },
   "devDependencies": {
     "@types/node": "18.0.6",
