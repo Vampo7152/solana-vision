@@ -20,7 +20,7 @@ const Home: NextPage = () => {
       <DefaultHead />
       <img className={styles.logo} src="https://res.cloudinary.com/dtzqgftjk/image/upload/v1674324595/2_cdaoyi_2_caoflv.png" alt="Solana Vision" />
       <h1 className={styles.headingOne}>Create minting links for CandyMachine & Gasless NFTs, seamlessly</h1>
-      <h1 className={styles.headingTwo}>powered by <a target="_blank" href="https://candypay.fun">CandyPay.</a></h1>
+      <h1 className={styles.headingTwo}>powered by <a target="_blank" rel="noreferrer" href="https://candypay.fun">CandyPay.</a></h1>
       <ConnectWallet>
         <button
           onClick={() => setClicked(true)}

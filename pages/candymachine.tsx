@@ -133,7 +133,7 @@ const CandyMachine: NextPage = () => {
                                 }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(solanaUrl)}</Tooltip></a>
                             </div>
                             <div className={styles.description}>
-                                - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs
+                                - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} rel="noreferrer" href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs
                             </div>
                         </div>
                     </>) : null}
