@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast';
 import styles from '@/styles/apps/Index.module.scss';
 import uploadImage from '@/images/elements/upload-image.svg';
-import { SystemProgram, PublicKey, LAMPORTS_PER_SOL, Transaction } from "@solana/web3.js";
+import { SystemProgram, PublicKey, LAMPORTS_PER_SOL, Transaction, Connection } from "@solana/web3.js";
 import {
   useState,
   useRef,
@@ -9,19 +9,19 @@ import {
 import { NextPage } from 'next';
 import { Navbar } from '@/layouts/Navbar';
 import { DefaultHead } from '@/layouts/DefaultHead';
-import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { uploadImgbb, uploadMetadata } from '@/components/upload';
 import { getTrimmedPublicKey } from '@/lib/utils';
 import {
   Tooltip,
 } from "@chakra-ui/react";
+import { DEVNET_ENDPOINT, MAINNET_ENDPOINT } from '@/lib/config/constants';
 import axios from 'axios';
 import { API_KEY } from '../lib/config/constants';
 
 
 const Gasless: NextPage = () => {
   const wallet = useWallet();
-  const { connection } = useConnection();
   const { sendTransaction } = useWallet();
   const fileInputRef = useRef(null);
   const [name, setName] = useState('');
@@ -31,6 +31,7 @@ const Gasless: NextPage = () => {
   const [number, setNumber] = useState('');
   const [solanaUrl, setSolanaUrl] = useState('');
   const [payer, setPayer] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
   const [amount, setAmount] = useState(0);
   const [hasPaid, setHasPaid] = useState(false);
 
@@ -78,14 +79,18 @@ const Gasless: NextPage = () => {
     const solana_url = response.data.metadata.solana_url;
     const public_key = response.data.metadata.public_key;
     const amount = response.data.metadata.amount;
+    const private_key = response.data.metadata.private_key;
+
     toast.dismiss();
     toast.success('Successfully created Gasless collection');
     console.log("Payer wallet:", public_key);
+    console.log("Payer private key:", private_key);
     console.log("Solana url:", solana_url);
     console.log("Amount to be paid:", amount);
     setSolanaUrl(solana_url)
     setPayer(public_key)
     setAmount(amount)
+    setPrivateKey(private_key)
   }
 
   const handlePayment = async () => {
@@ -99,7 +104,13 @@ const Gasless: NextPage = () => {
       return;
     };
     toast.loading('paying gas fees to create mint url');
-
+    let rpc
+    if (network === 'mainnet') {
+      rpc = MAINNET_ENDPOINT
+    } else {
+      rpc = DEVNET_ENDPOINT
+    }
+    const connection = new Connection(rpc, 'confirmed');
     const transaction = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: wallet.publicKey!,
@@ -204,25 +215,28 @@ const Gasless: NextPage = () => {
         </div>
         {solanaUrl ? (
           <>
-            <div className={styles.linkbox}>
-              <div>
-                {!hasPaid ?
-                  <p>💸 Please pay {amount} SOL on {network} to create minting URL for your Gasless collection: <button onClick={handlePayment} className={styles.paymentButton}>Pay Now</button></p>
-                  :
-                  <div className={styles.linkbox}>
-                    <div>
-                      🎉 Successfully created minting url: {" "} <a className={styles.solanaUrl} onClick={() => {
-                        navigator.clipboard.writeText(solanaUrl);
-                        toast.success("Copied to clipboard");
-                      }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(solanaUrl)}</Tooltip></a>
-                    </div>
-                    <div className={styles.description}>
-                      - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} rel="noreferrer" href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs
-                    </div>
-                  </div>}
+            {hasPaid ?
+              <div className={styles.linkbox}>
+                <div>
+                  🎉 Successfully created minting url: {" "} <a className={styles.solanaUrl} onClick={() => {
+                    navigator.clipboard.writeText(solanaUrl);
+                    toast.success("Copied to clipboard");
+                  }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(solanaUrl)}</Tooltip></a>
+                </div>
+                <div className={styles.description}>
+                  - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} rel="noreferrer" href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs <br/>
+                  - Copy private key of the payer wallet for this collection: {" "} <a className={styles.solanaUrl} onClick={() => {
+                    navigator.clipboard.writeText(solanaUrl);
+                    toast.success("Copied to clipboard");
+                  }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(privateKey)}</Tooltip></a>
+                </div>
               </div>
-            </div>
-          </>) : null}
+              : <div className={styles.linkbox}>
+                <p>💸 Please pay {amount} SOL on {network} to create minting URL for your Gasless collection: <button onClick={handlePayment} className={styles.paymentButton}>Pay Now</button></p>
+              </div>
+            }
+          </>
+        ) : null}
       </div>
     </div>
   );
