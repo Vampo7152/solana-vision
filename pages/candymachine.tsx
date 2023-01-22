@@ -10,6 +10,10 @@ import { Navbar } from '@/layouts/Navbar';
 import { DefaultHead } from '@/layouts/DefaultHead';
 import { uploadImgbb } from '@/components/upload';
 import { getCandyUrl } from '@/components/getUrl';
+import { getTrimmedPublicKey } from '@/lib/utils';
+import {
+    Tooltip,
+} from "@chakra-ui/react";
 
 const CandyMachine: NextPage = () => {
     const fileInputRef = useRef(null);
@@ -17,9 +21,11 @@ const CandyMachine: NextPage = () => {
     const [candymachine, setCandymachine] = useState('');
     const [network, setNetwork] = useState('mainnet');
     const [image, setImage] = useState('');
+    const [solanaUrl, setSolanaUrl] = useState('');
+
 
     const handleMint = async () => {
-        if ( !name || !candymachine || !image || !network) {
+        if (!name || !candymachine || !image || !network) {
             toast.error('Please fill out all fields');
             return;
         };
@@ -39,19 +45,7 @@ const CandyMachine: NextPage = () => {
         });
         const solana_url = await url;
         console.log(solana_url);
-        if (solana_url) {
-            toast(() => (
-                <span>
-                    Minting Link: 
-                    <button
-                        onClick={() => window.open(solana_url, '_blank')}
-                        className={styles.toastButton}
-                    >
-                        Open
-                    </button>
-                </span>
-            ));
-        }
+        setSolanaUrl(solana_url)
     }
 
     return (
@@ -128,8 +122,21 @@ const CandyMachine: NextPage = () => {
                     >
                         Submit
                     </button>
-
                 </div>
+                {solanaUrl ? (
+                    <>
+                        <div className={styles.linkbox}>
+                            <div>
+                                🎉 Successfully created the minting url: {" "} <a className={styles.solanaUrl} onClick={() => {
+                                    navigator.clipboard.writeText(solanaUrl);
+                                    toast.success("Copied to clipboard");
+                                }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(solanaUrl)}</Tooltip></a>
+                            </div>
+                            <div className={styles.description}>
+                                - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs
+                            </div>
+                        </div>
+                    </>) : null}
             </div>
         </div>
     );

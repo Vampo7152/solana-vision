@@ -17,7 +17,7 @@ export const Navbar = ({
         <div className={styles.logo}>
           <Link href="/">
             <a>
-              <img src={logo.src} alt="" />
+              <img src="https://res.cloudinary.com/dtzqgftjk/image/upload/v1674405674/Group_16_2_znhdgs.png" alt="" />
             </a>
           </Link>
         </div>

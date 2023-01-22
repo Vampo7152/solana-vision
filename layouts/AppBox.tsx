@@ -29,6 +29,7 @@ function AppBox(data: AppInterface) {
         >
           <img src={data.image} alt={data.name} />
         </div>
+        <hr/>
         <div className={styles.appBoxBody}>
           <h1>{data.name}</h1>
           <p>{data.description}</p>

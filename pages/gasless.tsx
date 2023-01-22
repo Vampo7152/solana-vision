@@ -1,30 +1,41 @@
 import toast from 'react-hot-toast';
 import styles from '@/styles/apps/Index.module.scss';
 import uploadImage from '@/images/elements/upload-image.svg';
+import { SystemProgram, PublicKey, LAMPORTS_PER_SOL, Transaction } from "@solana/web3.js";
 import {
   useState,
   useRef,
-  useEffect
 } from 'react';
 import { NextPage } from 'next';
 import { Navbar } from '@/layouts/Navbar';
 import { DefaultHead } from '@/layouts/DefaultHead';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { uploadImgbb, uploadMetadata } from '@/components/upload';
-import { getGaslessUrl } from '@/components/getUrl';
+import { getTrimmedPublicKey } from '@/lib/utils';
+import {
+  Tooltip,
+} from "@chakra-ui/react";
+import axios from 'axios';
+import { API_KEY } from '../lib/config/constants';
+
 
 const Gasless: NextPage = () => {
   const wallet = useWallet();
+  const { connection } = useConnection();
+  const { sendTransaction } = useWallet();
   const fileInputRef = useRef(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [network, setNetwork] = useState('mainnet');
   const [image, setImage] = useState('');
   const [number, setNumber] = useState('');
+  const [solanaUrl, setSolanaUrl] = useState('');
+  const [payer, setPayer] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [hasPaid, setHasPaid] = useState(false);
 
 
   const handleMint = async () => {
-
     if (!wallet) {
       toast.error('Please go back to home and connect your solana wallet');
       return;
@@ -34,39 +45,75 @@ const Gasless: NextPage = () => {
       toast.error('Please fill out all fields');
       return;
     };
+
     const metadataURI = await uploadMetadata(wallet, {
       name,
       description,
       image,
-    });
-
-    const url = getGaslessUrl(wallet, metadataURI!, {
-      name,
-      description,
-      image,
-      network,
-      number
-    })
-
-    toast.promise(url, {
-      loading: "Creating minting url",
-      error: "Failed to create minting url",
-      success: "Successfully created minting url"
-    });
-    const solana_url = await url;
-    if (solana_url) {
-      toast(() => (
-        <span>
-         Minting Link: 
-          <button
-            onClick={() => window.open(solana_url, '_blank')}
-            className={styles.toastButton}
-          >
-            Open
-          </button>
-        </span>
-      ));
+    })!;
+    toast.loading('Creating Gasless collection');
+    let headersList = {
+      "Accept": "*/*",
+      "Authorization": `Bearer ${API_KEY}`,
+      "Content-Type": "application/json"
     }
+    let size = Number(number)
+    let bodyContent = JSON.stringify({
+      "name": name,
+      "symbol": "",
+      "uri": metadataURI!,
+      "seller_fee": 0,
+      "collection_size": size,
+      "network": network,
+    }
+    );
+
+    let reqOptions = {
+      url: "https://api.candypay.fun/api/v1/gasless/generate",
+      method: "POST",
+      headers: headersList,
+      data: bodyContent,
+    }
+    const response = await axios.request(reqOptions);
+    const solana_url = response.data.metadata.solana_url;
+    const public_key = response.data.metadata.public_key;
+    const amount = response.data.metadata.amount;
+    toast.dismiss();
+    toast.success('Successfully created Gasless collection');
+    console.log("Payer wallet:", public_key);
+    console.log("Solana url:", solana_url);
+    console.log("Amount to be paid:", amount);
+    setSolanaUrl(solana_url)
+    setPayer(public_key)
+    setAmount(amount)
+  }
+
+  const handlePayment = async () => {
+    if (!wallet) {
+      toast.error('Please go back to home and connect your solana wallet');
+      return;
+    };
+
+    if (!name || !description || !image || !network || !number) {
+      toast.error('Please fill out all fields');
+      return;
+    };
+    toast.loading('paying gas fees to create mint url');
+
+    const transaction = new Transaction().add(
+      SystemProgram.transfer({
+        fromPubkey: wallet.publicKey!,
+        toPubkey: new PublicKey(payer),
+        lamports: amount * LAMPORTS_PER_SOL,
+      })
+    );
+
+    const signature = await sendTransaction(transaction, connection);
+
+    await connection.confirmTransaction(signature, "confirmed");
+    toast.dismiss();
+    toast.success("Successfully created minting url for Gasless collection");
+    setHasPaid(true)
   }
 
   return (
@@ -154,8 +201,28 @@ const Gasless: NextPage = () => {
           >
             Submit
           </button>
-
         </div>
+        {solanaUrl ? (
+          <>
+            <div className={styles.linkbox}>
+              <div>
+                {!hasPaid ?
+                  <p>💸 Please pay {amount} SOL on {network} to create minting URL for your Gasless collection: <button onClick={handlePayment} className={styles.paymentButton}>Pay Now</button></p>
+                  :
+                  <div className={styles.linkbox}>
+                    <div>
+                      🎉 Successfully created minting url: {" "} <a className={styles.solanaUrl} onClick={() => {
+                        navigator.clipboard.writeText(solanaUrl);
+                        toast.success("Copied to clipboard");
+                      }}><Tooltip label="Click to Copy">{getTrimmedPublicKey(solanaUrl)}</Tooltip></a>
+                    </div>
+                    <div className={styles.description}>
+                      - Click & copy the minting url above and visit tools like <span className={styles.solanaUrl}><a target={'_blank'} href="https://www.qrcode-monkey.com/">QR Code Monkey</a></span> to create a QR code for minting NFTs
+                    </div>
+                  </div>}
+              </div>
+            </div>
+          </>) : null}
       </div>
     </div>
   );

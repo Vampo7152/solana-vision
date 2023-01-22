@@ -44,8 +44,9 @@ export const getGaslessUrl = async (
     console.log(response.data);
     console.log("amount asked", response.data.metadata.amount);
     const solana_url = response.data.metadata.solana_url;
+    const public_key = response.data.metadata.public_key;
 
-    if (solana_url) return solana_url;
+    if (solana_url) return {solana_url, public_key };
     throw new Error('Unable to create mint url');
 };
 
@@ -59,7 +60,7 @@ export const getCandyUrl = async (
 
     let headersList = {
         "Accept": "*/*",
-        "Authorization": "Bearer tF_f71sRp3UV-hRfJlauo",
+        "Authorization": `Bearer ${API_KEY}`,
         "Content-Type": "application/json"
     }
     let bodyContent = JSON.stringify({

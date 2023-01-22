@@ -1,14 +1,6 @@
 import { DefaultHead } from '@/layouts/DefaultHead';
 import type { NextPage } from 'next';
-
-// Stylesheet Imports
 import styles from '@/styles/Home.module.scss';
-
-// Image Imports
-import logo from '@/images/logo.svg';
-import globe from '@/images/backgrounds/globe.png';
-
-// Component Imports
 import { ConnectWallet } from '@/layouts/Wallet';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
@@ -26,18 +18,17 @@ const Home: NextPage = () => {
   return (
     <div className={styles.main}>
       <DefaultHead />
-      <img className={styles.logo} src={logo.src} alt="Solana Vision" />
-      <h1 className={styles.headingOne}>Place for small micro tools</h1>
-      <h1 className={styles.headingTwo}>By Community. On Solana.</h1>
+      <img className={styles.logo} src="https://res.cloudinary.com/dtzqgftjk/image/upload/v1674324595/2_cdaoyi_2_caoflv.png" alt="Solana Vision" />
+      <h1 className={styles.headingOne}>Create minting links for CandyMachine & Gasless NFTs, seamlessly</h1>
+      <h1 className={styles.headingTwo}>powered by <a target="_blank" href="https://candypay.fun">CandyPay.</a></h1>
       <ConnectWallet>
         <button
           onClick={() => setClicked(true)}
           className="connect-wallet mt-1"
         >
-          Connect Wallet
+          Get Started
         </button>
       </ConnectWallet>
-      <img className={styles.globe} src={globe.src} alt="" />
     </div>
   );
 }

@@ -31,6 +31,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin-bottom: 0.5rem !important;
 }
 
 .gaslessbox {
@@ -44,6 +45,20 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  margin-bottom: 0.5rem !important;
+}
+
+.linkbox {
+  padding: 1.5rem;
+  width: 40.375rem;
+  height: 8rem;
+  background: #FFFFFF;
+  box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.05);
+  border-radius: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-bottom: 3.42rem !important;
 }
 
 .uploadBox {
@@ -135,6 +150,26 @@
   }
 }
 
+.paymentButton {
+  padding:  0.2rem 0.8rem;
+  margin-top: 0.5rem;
+  color: white;
+  background: black;
+  border: 0.05rem solid black;
+  border-radius: 0.2rem;
+  cursor: pointer;
+  transition: 0.3s all linear;
+  &:hover {
+    background: #F2F3F7;
+    color: black;
+  }
+}
+
 .imageLink {
   margin-top: 2rem;
+}
+
+.solanaUrl{
+  color: #7E7E8F;
+  background: #F2F3F7;
 }
