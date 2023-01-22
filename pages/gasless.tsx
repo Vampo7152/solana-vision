@@ -26,7 +26,6 @@ const Gasless: NextPage = () => {
   const fileInputRef = useRef(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [network, setNetwork] = useState('mainnet');
   const [image, setImage] = useState('');
   const [number, setNumber] = useState('');
   const [solanaUrl, setSolanaUrl] = useState('');
@@ -41,7 +40,7 @@ const Gasless: NextPage = () => {
       return;
     };
 
-    if (!name || !description || !image || !network || !number) {
+    if (!name || !description || !image || !number) {
       toast.error('Please fill out all fields');
       return;
     };
@@ -64,7 +63,7 @@ const Gasless: NextPage = () => {
       "uri": metadataURI!,
       "seller_fee": 0,
       "collection_size": size,
-      "network": network,
+      "network": "mainnet",
     }
     );
 
@@ -94,7 +93,7 @@ const Gasless: NextPage = () => {
       return;
     };
 
-    if (!name || !description || !image || !network || !number) {
+    if (!name || !description || !image || !number) {
       toast.error('Please fill out all fields');
       return;
     };
@@ -126,7 +125,7 @@ const Gasless: NextPage = () => {
           <div>
             <h1 className={styles.heading}>Gasless NFT collection</h1>
             <p className={styles.description}>Create minting url for a Gasless NFT collection, where you
-              pay for gas fees beforehand and others can mint in a gasless manner</p>
+              pay for gas fees beforehand and others can mint in a gasless manner. Works on mainnet by default*</p>
             <div className="mt-2">
               <p className={styles.inputLabel}>Enter name of the NFT</p>
               <input
@@ -154,19 +153,6 @@ const Gasless: NextPage = () => {
                 className={styles.input}
                 placeholder="Eg. 20"
               />
-            </div>
-            <div className="mt-1-5">
-              <p className={styles.inputLabel}>Select the network</p>
-              <select
-                value={network}
-                className={`${styles.selectarea}`}
-                onChange={(e) => {
-                  setNetwork(e.target.value);
-                }}
-              >
-                <option value="mainnet">Mainnet</option>
-                <option value="devnet">Devnet</option>
-              </select>
             </div>
             <div
               className="mt-1-5 pointer"
@@ -207,7 +193,7 @@ const Gasless: NextPage = () => {
             <div className={styles.linkbox}>
               <div>
                 {!hasPaid ?
-                  <p>💸 Please pay {amount} SOL on {network} to create minting URL for your Gasless collection: <button onClick={handlePayment} className={styles.paymentButton}>Pay Now</button></p>
+                  <p>💸 Please pay {amount} SOL on mainnet to create minting URL for your Gasless collection: <button onClick={handlePayment} className={styles.paymentButton}>Pay Now</button></p>
                   :
                   <div className={styles.linkbox}>
                     <div>
